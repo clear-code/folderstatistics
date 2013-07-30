@@ -6,7 +6,7 @@
   <script type="application/x-javascript" src="./triggerOverlay.js" />
   <menupopup id="taskPopup">
     <menu id="folder-statistics"
-      inserafter="menu_import"
+      insertafter="menu_import"
       label="Calculate Folder Statistics">
       <menupopup id="folder-statistics-popup"
         onpopupshowing="FolderStatistics.onPopupShowing(event)"
@@ -16,7 +16,7 @@
   </menupopup>
   <menupopup id="appmenu_taskPopup">
     <menu id="appmenu-folder-statistics"
-      inserafter="appmenu_import"
+      insertafter="appmenu_import"
       label="Calculate Folder Statistics">
       <menupopup id="appmenu-folder-statistics-popup"
         onpopupshowing="FolderStatistics.onPopupShowing(event)"
