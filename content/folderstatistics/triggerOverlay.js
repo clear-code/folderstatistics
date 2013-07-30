@@ -35,8 +35,7 @@ var FolderStatistics = {
   onCommand: function FolderStatistics_onCommand(aEvent) {
     var item = aEvent.target;
     var server = this.getServer(item.value);
-    var statistics = this.getStatistics(server.rootFolder);
-    var csv = this.toCSV(statistics);
+    var csv = this.toCSV(this.getFoldersStatistics(server.rootFolder.subFolders));
     alert(csv);
   },
 
@@ -67,30 +66,35 @@ var FolderStatistics = {
     return foundServer;
   },
 
-  getStatistics: function FolderStatistics_getStatistics(aFolder, aParent) {
-    var results = [];
+  getFoldersStatistics: function FolderStatistics_getFoldersStatistics(aFolders, aParent) {
+    var foldersArray = [];
+    while (aFolders.hasMoreElements()) {
+      let folder = aFolders.getNext().QueryInterface(Ci.nsIMsgFolder);
+      foldersArray.push(this.getFolderStatistics(folder, aParent));
+    }
+    return foldersArray;
+  },
+  getFolderStatistics: function FolderStatistics_getFolderStatistics(aFolder, aParent) {
     var item = {
       name:     aFolder.prettyName,
       fullName: (aParent ? aParent + '/' : '') + aFolder.prettyName,
       count:    aFolder.getTotalMessages(false),
       size:     aFolder.sizeOnDisk // bytes
     };
-    var children = [];
-    var subFolders = aFolder.subFolders;
-    while (subFolders.hasMoreElements()) {
-      let subFolder = subFolders.getNext().QueryInterface(Ci.nsIMsgFolder);
-      children.push(this.getStatistics(subFolder, item.fullName));
-    }
+    var children = this.getFoldersStatistics(aFolder.subFolders, item.fullName);
     if (children.length > 0)
       item.children = children;
     return item;
   },
 
-  toCSV: function FolderStatistics_toCSV(aStatistics) {
-    var rows = this.itemToRows(aStatistics);
+  toCSV: function FolderStatistics_toCSV(aItems) {
+    var rows = []
+    aItems.forEach(function(aItem) {
+      rows = rows.concat(this.itemToRows(aItem));
+    }, this);
     return rows.map(function(aRow) {
       return aRow.map(this.escapeStringForCSV).join(',');
-    }, this).join(this.CSV_LINE_FEED);
+    }, this).sort().join(this.CSV_LINE_FEED);
   },
   escapeStringForCSV: function FolderStatistics_escapeStringForCSV(aValue) {
     if (typeof aValue == 'string')
