@@ -3,6 +3,28 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var FolderStatistics = {
+  domain: 'extensions.folderstatistics@clear-code.com.',
+
+  get Prefs() {
+    if (!this._Prefs) {
+      let ns = {};
+      Components.utils.import('resource://folderstatistics-modules/prefs.js', ns);
+      this._Prefs = ns.prefs;
+    }
+    return this._Prefs
+  },
+  _Prefs: null,
+
+  get TextIO() {
+    if (!this._TextIO) {
+      let ns = {};
+      Components.utils.import('resource://folderstatistics-modules/textIO.jsm', ns);
+      this._TextIO = ns.textIO;
+    }
+    return this._TextIO
+  },
+  _TextIO: null,
+
   onPopupShowing: function FolderStatistics_onPopupShowing(aEvent) {
     var popup = aEvent.currentTarget;
 
@@ -35,8 +57,27 @@ var FolderStatistics = {
   onCommand: function FolderStatistics_onCommand(aEvent) {
     var item = aEvent.target;
     var server = this.getServer(item.value);
-    var csv = this.toCSV(this.getFoldersStatistics(server.rootFolder.subFolders));
-    alert(csv);
+
+    var self = this;
+    this.asyncPickSaveFile(
+      'Choose the file',
+      server.rootFolder.prettyName + '.csv',
+      function(aFile) {
+        if (!aFile)
+          return;
+        try {
+          var statistics = self.getFoldersStatistics(server.rootFolder.subFolders);
+          var linefeed = self.Prefs.getPref(self.domain + 'CSV.linefeed');
+          var encoding = self.Prefs.getPref(self.domain + 'CSV.encoding');
+          var csv = self.toCSV(statistics, linefeed);
+          self.TextIO.writeTo(csv, aFile, encoding);
+          alert('Done: ' + aFile.path);
+        }
+        catch(error) {
+          Components.utils.reportError(error);
+        }
+      }
+    );
   },
 
   get allAccounts() {
@@ -87,14 +128,14 @@ var FolderStatistics = {
     return item;
   },
 
-  toCSV: function FolderStatistics_toCSV(aItems) {
+  toCSV: function FolderStatistics_toCSV(aItems, aLinefeed) {
     var rows = []
     aItems.forEach(function(aItem) {
       rows = rows.concat(this.itemToRows(aItem));
     }, this);
     return rows.map(function(aRow) {
       return aRow.map(this.escapeStringForCSV).join(',');
-    }, this).sort().join(this.CSV_LINE_FEED);
+    }, this).sort().join(aLinefeed || '\n');
   },
   escapeStringForCSV: function FolderStatistics_escapeStringForCSV(aValue) {
     if (typeof aValue == 'string')
@@ -102,7 +143,6 @@ var FolderStatistics = {
     else
       return aValue;
   },
-  CSV_LINE_FEED: '\r\n',
 
   itemToRows: function FolderStatistics_itemToRows(aItem) {
     var rows = [];
@@ -113,5 +153,38 @@ var FolderStatistics = {
       }, this);
     }
     return rows;
+  },
+
+  asyncPickSaveFile: function FolderStatistics_asyncPickSaveFile(aTitle, aDefaultFileName, aCallback) {
+    var filePicker = Cc['@mozilla.org/filepicker;1']
+        .createInstance(Ci.nsIFilePicker);
+
+    filePicker.init(
+      window,
+      aTitle,
+      filePicker.modeSave
+    );
+    if (aDefaultFileName)
+      filePicker.defaultString = aDefaultFileName;
+
+    var handleResult = function(aResult) {
+      var picked;
+      if (aResult == filePicker.returnOK || aResult == filePicker.returnReplace) {
+        picked = filePicker.file.QueryInterface(Ci.nsILocalFile);
+      }
+      else {
+        picked = null;
+      }
+      aCallback(picked);
+    };
+
+    if (typeof filePicker.open != 'function') { // Gecko 18 and olders
+      setTimeout(function() {
+        handleResult(filePicker.show());
+      }, 0);
+    }
+    else {
+      filePicker.open({ done: handleResult });
+    }
   }
 };

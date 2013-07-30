@@ -9,3 +9,5 @@ locale	folderstatistics	ja	locale/ja/folderstatistics/
 
 overlay	chrome://messenger/content/messenger.xul	chrome://folderstatistics/content/triggerOverlay.xul
 overlay	chrome://messenger/content/messageWindow.xul	chrome://folderstatistics/content/triggerOverlay.xul
+
+resource folderstatistics-modules modules/
