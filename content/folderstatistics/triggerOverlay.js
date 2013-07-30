@@ -6,9 +6,9 @@ var FolderStatistics = {
   onPopupShowing: function FolderStatistics_onPopupShowing(aEvent) {
     var popup = aEvent.currentTarget;
 
-    this.allAccounts.forEach(function(account) {
-      account = account.QueryInterface(Ci.nsIMsgAccount);
-      var server = account.incomingServer;
+    this.allAccounts.forEach(function(aAccount) {
+      aAccount = aAccount.QueryInterface(Ci.nsIMsgAccount);
+      var server = aAccount.incomingServer;
       var type = server.type;
       if (!/^(pop3|imap|none)$/.test(type))
         return;
