@@ -35,8 +35,9 @@ var FolderStatistics = {
   onCommand: function FolderStatistics_onCommand(aEvent) {
     var item = aEvent.target;
     var server = this.getServer(item.value);
-    var result = this.getSizes(server.rootFolder);
-    alert(item.value + '\n' + result);
+    var statistics = this.getStatistics(server.rootFolder);
+    var csv = this.toCSV(statistics);
+    alert(csv);
   },
 
   get allAccounts() {
@@ -57,26 +58,56 @@ var FolderStatistics = {
 
   getServer: function FolderStatistics_getServer(aKey) {
     var foundServer;
-    this.allAccounts.some(function(account) {
-      account = account.QueryInterface(Ci.nsIMsgAccount);
-      var server = account.incomingServer;
+    this.allAccounts.some(function(aAccount) {
+      aAccount = aAccount.QueryInterface(Ci.nsIMsgAccount);
+      var server = aAccount.incomingServer;
       if (server.key == aKey)
         return foundServer = server;
     }, this);
     return foundServer;
   },
 
-  getSizes: function FolderStatistics_getSizes(aFolder, aIndent) {
-    aIndent = (aIndent === undefined) ? '' : (aIndent + '  ');
+  getStatistics: function FolderStatistics_getStatistics(aFolder, aParent) {
     var results = [];
-    results.push(aFolder.prettyName + ' / ' + aFolder.getTotalMessages(false) + ' messages / ' +  aFolder.sizeOnDisk + ' bytes');
+    var item = {
+      name:     aFolder.prettyName,
+      fullName: (aParent ? aParent + '/' : '') + aFolder.prettyName,
+      count:    aFolder.getTotalMessages(false),
+      size:     aFolder.sizeOnDisk // bytes
+    };
+    var children = [];
     var subFolders = aFolder.subFolders;
     while (subFolders.hasMoreElements()) {
       let subFolder = subFolders.getNext().QueryInterface(Ci.nsIMsgFolder);
-      results.push(getSizes(subFolder, aIndent));
+      children.push(this.getStatistics(subFolder, item.fullName));
     }
-    return results.map(function(line) {
-      return line.replace(/^/g, aIndent);
-    }).join('\n');
+    if (children.length > 0)
+      item.children = children;
+    return item;
+  },
+
+  toCSV: function FolderStatistics_toCSV(aStatistics) {
+    var rows = this.itemToRows(aStatistics);
+    return rows.map(function(aRow) {
+      return aRow.map(this.escapeStringForCSV).join(',');
+    }, this).join(this.CSV_LINE_FEED);
+  },
+  escapeStringForCSV: function FolderStatistics_escapeStringForCSV(aValue) {
+    if (typeof aValue == 'string')
+      return '"' + aValue.replace(/"/g, '""') + '"';
+    else
+      return aValue;
+  },
+  CSV_LINE_FEED: '\r\n',
+
+  itemToRows: function FolderStatistics_itemToRows(aItem) {
+    var rows = [];
+    rows.push([aItem.fullName, Math.max(aItem.count, 0), aItem.size]);
+    if (aItem.children) {
+      aItem.children.forEach(function(aChild) {
+        rows = rows.concat(this.itemToRows(aChild));
+      }, this);
+    }
+    return rows;
   }
 };
