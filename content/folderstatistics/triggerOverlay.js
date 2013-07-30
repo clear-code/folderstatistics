@@ -67,13 +67,13 @@ var FolderStatistics = {
   },
 
   getSizes: function FolderStatistics_getSizes(aFolder, aIndent) {
-    aIndent = (indent === undefined) ? '' : (aIndent + '  ');
+    aIndent = (aIndent === undefined) ? '' : (aIndent + '  ');
     var results = [];
     results.push(aFolder.prettyName + ' / ' + aFolder.getTotalMessages(false) + ' messages / ' +  aFolder.sizeOnDisk + ' bytes');
     var subFolders = aFolder.subFolders;
     while (subFolders.hasMoreElements()) {
       let subFolder = subFolders.getNext().QueryInterface(Ci.nsIMsgFolder);
-      results.push(getSizes(subFolder, indent));
+      results.push(getSizes(subFolder, aIndent));
     }
     return results.map(function(line) {
       return line.replace(/^/g, aIndent);
