@@ -25,6 +25,16 @@ var FolderStatistics = {
   },
   _TextIO: null,
 
+  get bundle() {
+    if (!this._bundle) {
+      let ns = {};
+      Components.utils.import('resource://folderstatistics-modules/stringBundle.js', ns);
+      this._bundle = ns.stringBundle.get('chrome://folderstatistics/locale/messages.properties');
+    }
+    return this._bundle
+  },
+  _bundle: null,
+
   onPopupShowing: function FolderStatistics_onPopupShowing(aEvent) {
     var popup = aEvent.currentTarget;
 
@@ -60,8 +70,8 @@ var FolderStatistics = {
 
     var self = this;
     this.asyncPickSaveFile(
-      'Choose the file',
-      server.rootFolder.prettyName + '.csv',
+      this.bundle.getString('picker.title.csv'),
+      this.bundle.getFormattedString('picker.default.csv', [server.rootFolder.prettyName]),
       function(aFile) {
         if (!aFile)
           return;
@@ -71,7 +81,7 @@ var FolderStatistics = {
           var encoding = self.Prefs.getPref(self.domain + 'CSV.encoding');
           var csv = self.toCSV(statistics, linefeed);
           self.TextIO.writeTo(csv, aFile, encoding);
-          alert('Done: ' + aFile.path);
+          alert(self.bundle.getString('picker.report.csv', [server.rootFolder.prettyName, aFile.path]));
         }
         catch(error) {
           Components.utils.reportError(error);
