@@ -81,7 +81,7 @@ var FolderStatistics = {
           var encoding = self.Prefs.getPref(self.domain + 'CSV.encoding');
           var csv = self.toCSV(statistics, linefeed);
           self.TextIO.writeTo(csv, aFile, encoding);
-          alert(self.bundle.getString('picker.report.csv', [server.rootFolder.prettyName, aFile.path]));
+          alert(self.bundle.getFormattedString('picker.report.csv', [server.rootFolder.prettyName, aFile.path]));
         }
         catch(error) {
           Components.utils.reportError(error);
