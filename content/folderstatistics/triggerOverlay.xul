@@ -4,4 +4,24 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="./triggerOverlay.js" />
+  <menupopup id="taskPopup">
+    <menu id="folder-statistics"
+      inserafter="menu_import"
+      label="Calculate Folder Statistics">
+      <menupopup id="folder-statistics-popup"
+        onpopupshowing="FolderStatistics.onPopupShowing(event)"
+        onpopuphiding="FolderStatistics.onPopupHiding(event)"
+        oncommand="FolderStatistics.onCommand(event)"/>
+    </menu>
+  </menupopup>
+  <menupopup id="appmenu_taskPopup">
+    <menu id="appmenu-folder-statistics"
+      inserafter="appmenu_import"
+      label="Calculate Folder Statistics">
+      <menupopup id="appmenu-folder-statistics-popup"
+        onpopupshowing="FolderStatistics.onPopupShowing(event)"
+        onpopuphiding="FolderStatistics.onPopupHiding(event)"
+        oncommand="FolderStatistics.onCommand(event)"/>
+    </menu>
+  </menupopup>
 </overlay>
