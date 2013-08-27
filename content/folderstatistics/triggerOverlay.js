@@ -143,9 +143,19 @@ var FolderStatistics = {
     aItems.forEach(function(aItem) {
       rows = rows.concat(this.itemToRows(aItem));
     }, this);
-    return rows.map(function(aRow) {
+    rows = rows.map(function(aRow) {
       return aRow.map(this.escapeStringForCSV).join(',');
     }, this).sort().join(aLinefeed || '\n');
+
+    if (this.Prefs.getPref(this.domain + 'CSV.header')) {
+      rows.unshift([
+        this.bundle.getString('header.folder'),
+        this.bundle.getString('header.count'),
+        this.bundle.getString('header.size')
+      ]);
+    }
+
+    return rows;
   },
   escapeStringForCSV: function FolderStatistics_escapeStringForCSV(aValue) {
     if (typeof aValue == 'string')
