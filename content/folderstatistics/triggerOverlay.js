@@ -76,10 +76,16 @@ var FolderStatistics = {
         if (!aFile)
           return;
         try {
-          var statistics = self.getFoldersStatistics(server.rootFolder.subFolders);
+          var sizeNotation = self.Prefs.getPref(self.domain + 'CSV.sizeNotation');
+          var statistics = self.getFoldersStatistics(server.rootFolder.subFolders, null, sizeNotation);
           var linefeed = self.Prefs.getPref(self.domain + 'CSV.linefeed');
+          var header   = self.Prefs.getPref(self.domain + 'CSV.header');
           var encoding = self.Prefs.getPref(self.domain + 'CSV.encoding');
-          var csv = self.toCSV(statistics, linefeed);
+          var csv = self.toCSV(statistics, {
+                linefeed:     linefeed,
+                header:       header,
+                sizeNotation: sizeNotation
+              });
           self.TextIO.writeTo(csv, aFile, encoding);
           alert(self.bundle.getFormattedString('picker.report.csv', [server.rootFolder.prettyName, aFile.path]));
         }
@@ -117,41 +123,63 @@ var FolderStatistics = {
     return foundServer;
   },
 
-  getFoldersStatistics: function FolderStatistics_getFoldersStatistics(aFolders, aParent) {
+  SIZE_NOTATION_AUTO:   0,
+  SIZE_NOTATION_BYTES:  1 << 0,
+  SIZE_NOTATION_KBYTES: 1 << 1,
+
+  getFoldersStatistics: function FolderStatistics_getFoldersStatistics(aFolders, aParent, aSizeNotation) {
     var foldersArray = [];
     while (aFolders.hasMoreElements()) {
       let folder = aFolders.getNext().QueryInterface(Ci.nsIMsgFolder);
-      foldersArray.push(this.getFolderStatistics(folder, aParent));
+      foldersArray.push(this.getFolderStatistics(folder, aParent, aSizeNotation));
     }
     return foldersArray;
   },
-  getFolderStatistics: function FolderStatistics_getFolderStatistics(aFolder, aParent) {
+  getFolderStatistics: function FolderStatistics_getFolderStatistics(aFolder, aParent, aSizeNotation) {
+    var size = aFolder.sizeOnDisk; // bytes
+    if (aSizeNotation == this.SIZE_NOTATION_KBYTES) {
+      size = Math.round(size / 1024);
+    }
     var item = {
       name:     aFolder.prettyName,
       fullName: (aParent ? aParent + '/' : '') + aFolder.prettyName,
       count:    aFolder.getTotalMessages(false),
-      size:     aFolder.sizeOnDisk // bytes
+      size:     size
     };
-    var children = this.getFoldersStatistics(aFolder.subFolders, item.fullName);
+    var children = this.getFoldersStatistics(aFolder.subFolders, item.fullName, aSizeNotation);
     if (children.length > 0)
       item.children = children;
     return item;
   },
 
-  toCSV: function FolderStatistics_toCSV(aItems, aLinefeed) {
-    var rows = []
+  toCSV: function FolderStatistics_toCSV(aItems, aOptions) {
+    aOptions = aOptions || {};
+    var linefeed = aOptions.linefeed || aOptions.lineFeed || '\n';
+
+    var rows = [];
     aItems.forEach(function(aItem) {
       rows = rows.concat(this.itemToRows(aItem));
     }, this);
     rows = rows.map(function(aRow) {
       return aRow.map(this.escapeStringForCSV).join(',');
-    }, this).sort().join(aLinefeed || '\n');
+    }, this).sort().join(linefeed);
 
-    if (this.Prefs.getPref(this.domain + 'CSV.header')) {
+    if (aOptions.header) {
+      let sizeLabel = this.bundle.getString('header.size');
+      switch (aOptions.sizeNotation) {
+        case this.SIZE_NOTATION_BYTES:
+          sizeLabel += ' (bytes)';
+          break;
+        case this.SIZE_NOTATION_KBYTES:
+          sizeLabel += ' (kbytes)';
+          break;
+        default:
+          break;
+      }
       rows.unshift([
         this.bundle.getString('header.folder'),
         this.bundle.getString('header.count'),
-        this.bundle.getString('header.size')
+        sizeLabel
       ]);
     }
 
