@@ -11,4 +11,5 @@ pref("extensions.folderstatistics@clear-code.com.CSV.encoding", "Shift_JIS");
 // %MM      = month (ex. 09)
 // %DD      = date (ex. 01)
 pref("extensions.folderstatistics@clear-code.com.defaultFileName", "chrome://folderstatistics/local/messages.properties");
+pref("extensions.folderstatistics@clear-code.com.addDefaultExtension", true);
 

@@ -76,13 +76,20 @@ var FolderStatistics = {
       .replace(/\%mm/gi, ('0' + (now.getMonth() + 1)).slice(-2))
       .replace(/\%dd/gi, ('0' + now.getDate()).slice(-2));
 
+    var defaultExtension = '.csv';
+
     var self = this;
     this.asyncPickSaveFile(
       this.bundle.getString('picker.title.csv'),
-      fileName + '.csv',
+      fileName + defaultExtension,
       function(aFile) {
         if (!aFile)
           return;
+
+        if (!/\.[^\.]+$/.test(aFile.leafName) &&
+            self.Prefs.getPref(self.domain + 'addDefaultExtension'))
+          aFile.initWithPath(aFile.path + defaultExtension);
+
         try {
           var sizeNotation = self.Prefs.getPref(self.domain + 'CSV.sizeNotation');
           var statistics = self.getFoldersStatistics(server.rootFolder.subFolders, null, sizeNotation);
