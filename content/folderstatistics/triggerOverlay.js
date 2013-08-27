@@ -179,7 +179,7 @@ var FolderStatistics = {
         this.bundle.getString('header.folder'),
         this.bundle.getString('header.count'),
         sizeLabel
-      ]);
+      ].map(this.escapeStringForCSV));
     }
 
     return rows.join(aOptions.linefeed || aOptions.lineFeed || '\n');
