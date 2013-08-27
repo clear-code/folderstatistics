@@ -68,10 +68,18 @@ var FolderStatistics = {
     var item = aEvent.target;
     var server = this.getServer(item.value);
 
+    var now = new Date();
+    var fileName = this.Prefs.getLocalizedPref(this.domain + 'defaultFileName');
+    fileName = fileName
+      .replace(/\%account/gi, server.rootFolder.prettyName)
+      .replace(/\%yyyy/gi, now.getFullYear())
+      .replace(/\%mm/gi, ('0' + (now.getMonth() + 1)).slice(-2))
+      .replace(/\%dd/gi, ('0' + now.getDate()).slice(-2));
+
     var self = this;
     this.asyncPickSaveFile(
       this.bundle.getString('picker.title.csv'),
-      this.bundle.getFormattedString('picker.default.csv', [server.rootFolder.prettyName]),
+      fileName
       function(aFile) {
         if (!aFile)
           return;
