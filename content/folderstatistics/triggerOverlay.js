@@ -79,7 +79,7 @@ var FolderStatistics = {
     var self = this;
     this.asyncPickSaveFile(
       this.bundle.getString('picker.title.csv'),
-      fileName
+      fileName + '.csv',
       function(aFile) {
         if (!aFile)
           return;
