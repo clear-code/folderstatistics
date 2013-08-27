@@ -154,7 +154,6 @@ var FolderStatistics = {
 
   toCSV: function FolderStatistics_toCSV(aItems, aOptions) {
     aOptions = aOptions || {};
-    var linefeed = aOptions.linefeed || aOptions.lineFeed || '\n';
 
     var rows = [];
     aItems.forEach(function(aItem) {
@@ -162,7 +161,7 @@ var FolderStatistics = {
     }, this);
     rows = rows.map(function(aRow) {
       return aRow.map(this.escapeStringForCSV).join(',');
-    }, this).sort().join(linefeed);
+    }, this).sort();
 
     if (aOptions.header) {
       let sizeLabel = this.bundle.getString('header.size');
@@ -183,7 +182,7 @@ var FolderStatistics = {
       ]);
     }
 
-    return rows;
+    return rows.join(aOptions.linefeed || aOptions.lineFeed || '\n');
   },
   escapeStringForCSV: function FolderStatistics_escapeStringForCSV(aValue) {
     if (typeof aValue == 'string')
