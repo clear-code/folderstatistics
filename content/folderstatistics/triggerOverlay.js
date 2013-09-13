@@ -25,6 +25,15 @@ var FolderStatistics = {
   },
   _TextIO: null,
 
+  get PromptService() {
+    delete this.PromptService;
+    return this.PromptService = Components.classes['@mozilla.org/embedcomp/prompt-service;1']
+                                  .getService(Components.interfaces.nsIPromptService);
+  },
+  alert: function FolderStatistics_alert(aTitle, aMessage) {
+    this.PromptService.alert(window, aTitle, aMessage);
+  },
+
   get bundle() {
     if (!this._bundle) {
       let ns = {};
@@ -102,7 +111,8 @@ var FolderStatistics = {
                 sizeNotation: sizeNotation
               });
           self.TextIO.writeTo(csv, aFile, encoding);
-          alert(self.bundle.getFormattedString('picker.report.csv', [server.rootFolder.prettyName, aFile.path]));
+          self.alert(self.bundle.getString('picker.report.title'),
+                     self.bundle.getFormattedString('picker.report.csv', [server.rootFolder.prettyName, aFile.path]));
         }
         catch(error) {
           Components.utils.reportError(error);
