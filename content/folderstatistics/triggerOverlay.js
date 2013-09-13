@@ -6,24 +6,18 @@ var FolderStatistics = {
   domain: 'extensions.folderstatistics@clear-code.com.',
 
   get Prefs() {
-    if (!this._Prefs) {
-      let ns = {};
-      Components.utils.import('resource://folderstatistics-modules/prefs.js', ns);
-      this._Prefs = ns.prefs;
-    }
-    return this._Prefs
+    delete this.Prefs;
+    let ns = {};
+    Components.utils.import('resource://folderstatistics-modules/prefs.js', ns);
+    return this.Prefs = ns.prefs;
   },
-  _Prefs: null,
 
   get TextIO() {
-    if (!this._TextIO) {
-      let ns = {};
-      Components.utils.import('resource://folderstatistics-modules/textIO.jsm', ns);
-      this._TextIO = ns.textIO;
-    }
-    return this._TextIO
+    delete this.TextIO;
+    let ns = {};
+    Components.utils.import('resource://folderstatistics-modules/textIO.jsm', ns);
+    return this.TextIO = ns.textIO;
   },
-  _TextIO: null,
 
   get PromptService() {
     delete this.PromptService;
@@ -35,14 +29,11 @@ var FolderStatistics = {
   },
 
   get bundle() {
-    if (!this._bundle) {
-      let ns = {};
-      Components.utils.import('resource://folderstatistics-modules/stringBundle.js', ns);
-      this._bundle = ns.stringBundle.get('chrome://folderstatistics/locale/messages.properties');
-    }
-    return this._bundle
+    delete this.bundle;
+    let ns = {};
+    Components.utils.import('resource://folderstatistics-modules/stringBundle.js', ns);
+    return this.bundle = ns.stringBundle.get('chrome://folderstatistics/locale/messages.properties');
   },
-  _bundle: null,
 
   onPopupShowing: function FolderStatistics_onPopupShowing(aEvent) {
     var popup = aEvent.currentTarget;
