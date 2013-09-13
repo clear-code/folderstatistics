@@ -88,7 +88,7 @@ var FolderStatistics = {
 
         if (!/\.[^a-z0-9]+$/i.test(aFile.leafName) &&
             self.Prefs.getPref(self.domain + 'addDefaultExtension'))
-          aFile.initWithPath(aFile.path + defaultExtension);
+          aFile.initWithPath(aFile.path.replace(/\.$/, '') + defaultExtension);
 
         try {
           var sizeNotation = self.Prefs.getPref(self.domain + 'CSV.sizeNotation');
