@@ -86,7 +86,7 @@ var FolderStatistics = {
         if (!aFile)
           return;
 
-        if (!/\.[^\.]+$/.test(aFile.leafName) &&
+        if (!/\.[^a-z0-9]+$/i.test(aFile.leafName) &&
             self.Prefs.getPref(self.domain + 'addDefaultExtension'))
           aFile.initWithPath(aFile.path + defaultExtension);
 
