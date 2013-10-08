@@ -81,17 +81,8 @@ var FolderStatistics = {
     var defaultExtension = '.csv';
 
     var self = this;
-    this.asyncPickSaveFile(
-      this.bundle.getString('picker.title.csv'),
-      fileName + defaultExtension,
-      function(aFile) {
-        if (!aFile)
-          return;
 
-        if (!/\.[a-z0-9]+$/i.test(aFile.leafName) &&
-            self.Prefs.getPref(self.domain + 'addDefaultExtension'))
-          aFile.initWithPath(aFile.path.replace(/\.$/, '') + defaultExtension);
-
+    var outputStatistics = function(aFile) {
         try {
           var sizeNotation = self.Prefs.getPref(self.domain + 'CSV.sizeNotation');
           var statistics = self.getFoldersStatistics(server.rootFolder.subFolders, null, sizeNotation);
@@ -109,6 +100,30 @@ var FolderStatistics = {
         }
         catch(error) {
           Components.utils.reportError(error);
+        }
+    };
+
+    this.asyncPickSaveFile(
+      this.bundle.getString('picker.title.csv'),
+      fileName + defaultExtension,
+      function(aFile) {
+        if (!aFile)
+          return;
+
+        if (!/\.[a-z0-9]+$/i.test(aFile.leafName) &&
+            self.Prefs.getPref(self.domain + 'addDefaultExtension'))
+          aFile.initWithPath(aFile.path.replace(/\.$/, '') + defaultExtension);
+
+        if (type == 'imap') {
+          var updatingStatus = self.updateAllFolders(server.rootFolder);
+          setTimeout(function checkStatus() {
+            // Components.utils.reportError('updating:\n'+self.lastUpdatingFolderListeners.map(function(aListener) { return aListener.folder.name + ' (' + aListener.folder.URI + ')'; }).join('\n'));
+            if (!updatingStatus.next())
+              return setTimeout(checkStatus, 250);
+            outputStatistics(aFile);
+          }, 0);
+        } else {
+          outputStatistics(aFile);
         }
       }
     );
