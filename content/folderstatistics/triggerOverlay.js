@@ -48,6 +48,7 @@ var FolderStatistics = {
         var item = document.createElement('menuitem');
         item.setAttribute('label', server.prettyName);
         item.setAttribute('value', server.key);
+        item.setAttribute('data-server-type', server.type);
         popup.appendChild(item);
       }
       catch(error) {
@@ -67,6 +68,7 @@ var FolderStatistics = {
   onCommand: function FolderStatistics_onCommand(aEvent) {
     var item = aEvent.target;
     var server = this.getServer(item.value);
+    var type = item.getAttribute('data-server-type');
 
     var now = new Date();
     var fileName = this.Prefs.getLocalizedPref(this.domain + 'defaultFileName');
