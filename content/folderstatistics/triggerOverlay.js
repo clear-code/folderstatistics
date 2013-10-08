@@ -125,7 +125,11 @@ var FolderStatistics = {
           setTimeout(function checkStatus() {
             // Components.utils.reportError('updating:\n'+self.lastUpdatingFolderListeners.map(function(aListener) { return aListener.folder.name + ' (' + aListener.folder.URI + ')'; }).join('\n'));
             try {
-              if (!updatingStatus.next())
+              var progress = updatingStatus.next();
+              var bar = messageWindow.document.getElementById('progressbar');
+              if (bar)
+                bar.value = progress;
+              if (progress < 100)
                 return setTimeout(checkStatus, 250);
               messageWindow.close();
               outputStatistics(aFile);
@@ -197,15 +201,16 @@ var FolderStatistics = {
     }, this);
 
     this.lastUpdatingFolderListeners = listeners;
+    var total = listeners.length || 1;
     return (function() {
       while (listeners.length) {
         listeners = listeners.filter(function(aListener) {
           return aListener && !aListener.finished;
         });
         this.lastUpdatingFolderListeners = listeners;
-        yield false;
+        yield Math.round((total - listeners.length) / total * 100);
       }
-      yield true;
+      yield 100;
     }).call(this);
   },
   createURLListenerForFolder: function FolderStatistics_createURLListenerForFolder(aFolder) {

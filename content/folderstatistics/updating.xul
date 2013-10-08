@@ -10,5 +10,6 @@
   <vbox>
     <label value="&updating.message1;"/>
     <label value="&updating.message2;"/>
+    <hbox><progressmeter id="progressbar" mode="determined" value="0"/></hbox>
   </vbox>
 </window>
