@@ -162,7 +162,7 @@ var FolderStatistics = {
     }
     var listeners = updatingFolders.map(function(aFolder) {
       aFolder.QueryInterface(Ci.nsIMsgImapMailFolder);
-      if (!aFolder.canSubscribe)
+      if (aFolder.noSelect)
         return null;
       var listener = this.createURLListenerForFolder(aFolder);
       aFolder.updateFolderWithListener(msgWindow, listener);
