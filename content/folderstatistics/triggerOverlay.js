@@ -145,6 +145,54 @@ var FolderStatistics = {
   SIZE_NOTATION_BYTES:  1 << 0,
   SIZE_NOTATION_KBYTES: 1 << 1,
 
+  updateAllFolders: function FolderStatistics_updateAllFolders(aRootFolder) {
+    var updatingFolders = [];
+    if ('descendants' in aRootFolder) { // Thunderbird 24
+      let folders = aRootFolder.descendants;
+      for (let i = 0, maxi = folders.length; i < maxi; i++) {
+        updatingFolders.push(folders.queryElementAt(i));
+      }
+    } else { // Thunderbird 17 or olders
+      let folders = Cc['@mozilla.org/supports-array;1']
+                      .createInstance(Ci.nsISupportsArray);
+      aRootFolder.ListDescendents(folders);
+      for (let i = 0, maxi = folders.Count(); i < maxi; i++) {
+        updatingFolders.push(folders.GetElementAt(i).QueryInterface(Ci.nsIMsgFolder));
+      }
+    }
+    var listeners = updatingFolders.map(function(aFolder) {
+      aFolder.QueryInterface(Ci.nsIMsgImapMailFolder);
+      if (!aFolder.canSubscribe)
+        return null;
+      var listener = this.createURLListenerForFolder(aFolder);
+      aFolder.updateFolderWithListener(msgWindow, listener);
+      return listener;
+    }, this);
+
+    this.lastUpdatingFolderListeners = listeners;
+    return (function() {
+      while (listeners.length) {
+        listeners = listeners.filter(function(aListener) {
+          return aListener && !aListener.finished;
+        });
+        this.lastUpdatingFolderListeners = listeners;
+        yield false;
+      }
+      yield true;
+    }).call(this);
+  },
+  createURLListenerForFolder: function FolderStatistics_createURLListenerForFolder(aFolder) {
+    return {
+      OnStartRunningUrl: function OnStartRunningUrl(aURL) {
+      },
+      OnStopRunningUrl: function OnStopRunningUrl(aURL, aExitCode) {
+        this.finished = true;
+      },
+      folder: aFolder,
+      finished: false
+    };
+  },
+
   getFoldersStatistics: function FolderStatistics_getFoldersStatistics(aFolders, aParent, aSizeNotation) {
     var foldersArray = [];
     while (aFolders.hasMoreElements()) {
