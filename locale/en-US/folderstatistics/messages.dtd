@@ -4,3 +4,7 @@
 
 <!ENTITY outputStatistics.label     "Output Folder Statistics">
 <!ENTITY outputStatistics.accesskey "t">
+
+<!ENTITY updating.title    "Calculating folder statistics...">
+<!ENTITY updating.message1 "Now calculating folder statistics.">
+<!ENTITY updating.message2 "Wait for a while...">

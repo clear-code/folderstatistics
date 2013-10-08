@@ -115,12 +115,24 @@ var FolderStatistics = {
           aFile.initWithPath(aFile.path.replace(/\.$/, '') + defaultExtension);
 
         if (type == 'imap') {
+          var messageWindow = openDialog(
+            'chrome://folderstatistics/content/updating.xul',
+            '_blank',
+            'chrome,dialog=no,centerscreen=yes,dependent=yes,minimizable=no,' +
+              'fullscreen=no,titlebar=no,alwaysRaised=yes,close=no'
+          );
           var updatingStatus = self.updateAllFolders(server.rootFolder);
           setTimeout(function checkStatus() {
             // Components.utils.reportError('updating:\n'+self.lastUpdatingFolderListeners.map(function(aListener) { return aListener.folder.name + ' (' + aListener.folder.URI + ')'; }).join('\n'));
-            if (!updatingStatus.next())
-              return setTimeout(checkStatus, 250);
-            outputStatistics(aFile);
+            try {
+              if (!updatingStatus.next())
+                return setTimeout(checkStatus, 250);
+              messageWindow.close();
+              outputStatistics(aFile);
+            } catch(aException) {
+              Components.utils.reportError(aException);
+              messageWindow.close();
+            }
           }, 0);
         } else {
           outputStatistics(aFile);

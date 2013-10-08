@@ -4,3 +4,7 @@
 
 <!ENTITY outputStatistics.label     "フォルダの統計情報を出力">
 <!ENTITY outputStatistics.accesskey "t">
+
+<!ENTITY updating.title    "統計情報を収集中...">
+<!ENTITY updating.message1 "統計情報を収集しています。">
+<!ENTITY updating.message2 "しばらくお待ち下さい...">
