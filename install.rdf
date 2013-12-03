@@ -5,7 +5,7 @@
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="folderstatistics@clear-code.com"
                    em:name="Folder Statistics"
-                   em:version="0.4"
+                   em:version="0.5"
                    em:description="Outputs statistics of message folders."
                    em:creator="ClearCode Inc."
                    em:homepageURL="http://www.clear-code.com/">
