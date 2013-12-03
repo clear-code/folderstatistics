@@ -151,11 +151,11 @@ var FolderStatistics = {
     var accountsArray = [];
     if (accounts instanceof Ci.nsISupportsArray) {
       for (let i = 0, maxi = accounts.Count(); i < maxi; i++) {
-        accountsArray.push(accounts.GetElementAt(i));
+        accountsArray.push(accounts.GetElementAt(i).QueryInterface(Ci.nsIMsgAccount));
       }
     } else if (accounts instanceof Ci.nsIArray) {
       for (let i = 0, maxi = accounts.length; i < maxi; i++) {
-        accountsArray.push(accounts.queryElementAt(i));
+        accountsArray.push(accounts.queryElementAt(i, Ci.nsIMsgAccount));
       }
     }
     return accountsArray;
