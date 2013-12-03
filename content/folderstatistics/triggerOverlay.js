@@ -181,7 +181,7 @@ var FolderStatistics = {
     if ('descendants' in aRootFolder) { // Thunderbird 24
       let folders = aRootFolder.descendants;
       for (let i = 0, maxi = folders.length; i < maxi; i++) {
-        updatingFolders.push(folders.queryElementAt(i));
+        updatingFolders.push(folders.queryElementAt(i, Ci.nsIMsgFolder));
       }
     } else { // Thunderbird 17 or olders
       let folders = Cc['@mozilla.org/supports-array;1']
